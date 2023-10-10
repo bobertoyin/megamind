@@ -9,7 +9,7 @@
     unused_import_braces,
     unused_qualifications
 )]
-#![feature(doc_auto_cfg)]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 
 use std::{error::Error, fmt::Display};
 
