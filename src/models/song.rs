@@ -45,7 +45,7 @@ pub struct Song {
     /// Release date.
     pub release_date: Option<String>,
     /// Associated album.
-    pub album: Album,
+    pub album: Option<Album>,
     /// Custom performances.
     pub custom_performances: Vec<Performance>,
     /// Song description as an annotation.
@@ -247,7 +247,7 @@ pub struct Album {
     /// Name of the album.
     pub name: String,
     /// A display-ready release date.
-    pub release_date_for_display: String,
+    pub release_date_for_display: Option<String>,
     /// Genius URL to the album.
     pub url: String,
     /// Album's artist.
