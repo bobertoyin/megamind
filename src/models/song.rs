@@ -67,7 +67,7 @@ pub struct Song {
     /// Verified contributors.
     pub verified_contributors: Vec<Contribution>,
     /// Providers of verified lyrics.
-    pub verified_lyrics_by: Vec<()>,
+    pub verified_lyrics_by: Vec<UserCore<UserInteractionMetadata>>,
     /// Song writers.
     pub writer_artists: Vec<ArtistCoreNoMetadata>,
     /// Core song data.
