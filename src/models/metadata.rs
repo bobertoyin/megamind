@@ -86,24 +86,29 @@ pub struct SongInteractions {
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Default)]
 pub struct AnnotationActions {
     /// Accept.
-    pub accept: PrimaryAction,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub accept: Option<PrimaryAction>,
     /// Reject.
-    pub reject: PrimaryAction,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reject: Option<PrimaryAction>,
     /// Delete.
-    pub delete: PrimaryAction,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub delete: Option<PrimaryAction>,
 }
 
 /// Song actions.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Default)]
 pub struct SongActions {
     /// Edit metadata.
-    pub edit_metadata: PrimaryAction,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub edit_metadata: Option<PrimaryAction>,
 }
 
 /// Song relationships.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct SongRelationships {
     /// Pinned role.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub pinned_role: Option<String>,
 }
 
