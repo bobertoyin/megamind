@@ -43,7 +43,7 @@ pub struct Song {
     /// Recording location.
     pub recording_location: Option<String>,
     /// Release date.
-    pub release_date: String,
+    pub release_date: Option<String>,
     /// Associated album.
     pub album: Album,
     /// Custom performances.
