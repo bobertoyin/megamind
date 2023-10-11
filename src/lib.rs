@@ -13,6 +13,7 @@
 
 use std::{error::Error, fmt::Display};
 
+use log::info;
 use reqwest::{
     header::{HeaderMap, HeaderValue, InvalidHeaderValue, AUTHORIZATION},
     Client as ReqwestClient, Error as ReqwestError,
@@ -51,11 +52,21 @@ impl Client {
     ///
     /// A [`Response`].
     /// [`reqwest::Error`]s can occur if the request fails at the [`reqwest`] level, which includes HTTP related things and JSON parsing.
-    async fn get<T: DeserializeOwned, S: AsRef<str>, Q: Serialize + ?Sized>(
+    async fn get<T: DeserializeOwned, S: AsRef<str>, P: Serialize + AsRef<str>>(
         &self,
         endpoint: S,
-        query: &Q,
+        query: &[(&str, P)],
     ) -> Result<Response<T>, ReqwestError> {
+        info!(
+            target: "megamind::get",
+            "endpoint: \"{}\", queries: \"{}\"",
+            endpoint.as_ref(),
+            query
+                .iter()
+                .map(|q| format!("{}={}", q.0, q.1.as_ref()))
+                .collect::<Vec<String>>()
+                .join(",")
+        );
         self.internal
             .get(format!("{}{}", BASE_URL, endpoint.as_ref()))
             .query(query)
