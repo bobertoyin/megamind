@@ -13,6 +13,7 @@ use megamind::{Client, ClientBuilder, ReferentAssociation};
 
 #[fixture]
 fn token() -> String {
+    let _ = env_logger::builder().is_test(true).try_init();
     var("GENIUS_TOKEN").unwrap()
 }
 
@@ -35,6 +36,7 @@ pub fn reqwest_client(token: String) -> ReqwestClient {
 
 #[rstest]
 #[tokio::test]
+
 async fn test_account(client: Client, reqwest_client: ReqwestClient) {
     let (result, expected) = try_join!(
         client.account(),
@@ -51,6 +53,7 @@ async fn test_account(client: Client, reqwest_client: ReqwestClient) {
 
 #[rstest]
 #[tokio::test]
+
 async fn test_annotation(
     #[values(16292, 34112, 10225840, 999999999)] id: u32,
     client: Client,
@@ -74,6 +77,7 @@ async fn test_annotation(
 
 #[rstest]
 #[tokio::test]
+
 async fn test_artist(
     #[values(1234, 1421, 13440, 16775, 999999, 999999999)] id: u32,
     client: Client,
@@ -97,6 +101,7 @@ async fn test_artist(
 
 #[rstest]
 #[tokio::test]
+
 async fn test_referents(
     #[values(None, Some(12), Some(999999999))] created_by: Option<u32>,
     #[values(
@@ -143,6 +148,7 @@ async fn test_referents(
 
 #[rstest]
 #[tokio::test]
+
 async fn test_search(
     #[values("", "Kendrick Lamar", "Drake", "Mask Of", "Ella Fitzgerald", "Mozart")]
     query: &str,
@@ -164,6 +170,7 @@ async fn test_search(
 
 #[rstest]
 #[tokio::test]
+
 async fn test_song(
     #[values(
         7756301, 6691103, 7327436, 5444192, 7784464, 3892702, 2416243, 99999, 99999999
@@ -190,6 +197,7 @@ async fn test_song(
 
 #[rstest]
 #[tokio::test]
+
 async fn test_user(
     #[values(1234, 1421, 13440, 16775, 999999, 999999999)] id: u32,
     client: Client,
@@ -213,6 +221,7 @@ async fn test_user(
 
 #[rstest]
 #[tokio::test]
+
 async fn test_web_pages(
     #[values(None, Some("https://docs.genius.com"), Some("https://foobar.com"))]
     raw_annotatable_url: Option<&str>,
