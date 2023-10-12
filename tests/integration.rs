@@ -179,10 +179,7 @@ async fn test_search(
 #[tokio::test]
 
 async fn test_song(
-    #[values(
-        7756301, 6691103, 7327436, 5444192, 7784464, 3892702, 2416243, 99999, 99999999
-    )]
-    id: u32,
+    #[values(2177076, 7756301, 6691103, 7327436, 5444192, 99999, 99999999)] id: u32,
     client: Client,
     reqwest_client: ReqwestClient,
 ) {
