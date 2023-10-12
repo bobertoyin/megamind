@@ -64,7 +64,7 @@ pub struct UserCore<M> {
     /// Genius ID.
     pub id: u32,
     /// Genius IQ.
-    pub iq: u32,
+    pub iq: i32,
     /// User name (not sure why this is a dupe of [`UserCore::name`]).
     pub login: String,
     /// User name.

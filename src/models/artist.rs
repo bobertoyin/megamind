@@ -69,7 +69,7 @@ pub struct ArtistCoreNoMetadata {
     pub id: u32,
     /// Genius IQ.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub iq: Option<u32>,
+    pub iq: Option<i32>,
     /// Artist image URL.
     pub image_url: String,
     /// Whether the artist is meme verified.
