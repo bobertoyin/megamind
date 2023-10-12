@@ -11,20 +11,31 @@
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 
-use std::{error::Error, fmt::Display};
-
 use log::info;
 use reqwest::{
     header::{HeaderMap, HeaderValue, InvalidHeaderValue, AUTHORIZATION},
     Client as ReqwestClient, Error as ReqwestError,
 };
 use serde::{de::DeserializeOwned, Serialize};
+use serde_json::{from_slice, Error as JsonError};
+use thiserror::Error;
 
 pub mod models;
 use models::*;
 
 /// The base URL for the API.
 pub static BASE_URL: &str = "https://api.genius.com";
+
+/// Client errors.
+#[derive(Debug, Error)]
+pub enum ClientError {
+    /// An error related to the act of sending and receiving over HTTP.
+    #[error("HTTP request error: {0}")]
+    HttpError(#[from] ReqwestError),
+    /// An error related to parsing an HTTP response body as JSON.
+    #[error("JSON parse error: {0}")]
+    JsonError(#[from] JsonError),
+}
 
 /// An HTTP client for interacting with the Genius API.
 ///
@@ -56,7 +67,7 @@ impl Client {
         &self,
         endpoint: S,
         query: &[(&str, P)],
-    ) -> Result<Response<T>, ReqwestError> {
+    ) -> Result<Response<T>, ClientError> {
         info!(
             target: "megamind::get",
             "endpoint: \"{}\", queries: \"{}\"",
@@ -67,13 +78,15 @@ impl Client {
                 .collect::<Vec<String>>()
                 .join(",")
         );
-        self.internal
+        let text = self
+            .internal
             .get(format!("{}{}", BASE_URL, endpoint.as_ref()))
             .query(query)
             .send()
             .await?
-            .json::<Response<T>>()
-            .await
+            .bytes()
+            .await?;
+        Ok(from_slice(&text)?)
     }
 
     /// Get the account info for the currently authed user.
@@ -83,7 +96,7 @@ impl Client {
     /// # Returns
     ///
     /// The current user.
-    pub async fn account(&self) -> Result<Response<AccountResponse>, ReqwestError> {
+    pub async fn account(&self) -> Result<Response<AccountResponse>, ClientError> {
         self.get("/account", &[("text_format", "html,plain")]).await
     }
 
@@ -99,7 +112,7 @@ impl Client {
     pub async fn annotation(
         &self,
         id: u32,
-    ) -> Result<Response<AnnotationResponse>, ReqwestError> {
+    ) -> Result<Response<AnnotationResponse>, ClientError> {
         self.get(
             format!("/annotations/{}", id),
             &[("text_format", "html,plain")],
@@ -119,7 +132,7 @@ impl Client {
     pub async fn artist(
         &self,
         id: u32,
-    ) -> Result<Response<ArtistResponse>, ReqwestError> {
+    ) -> Result<Response<ArtistResponse>, ClientError> {
         self.get(format!("/artists/{}", id), &[("text_format", "html,plain")])
             .await
     }
@@ -146,7 +159,7 @@ impl Client {
         associated: Option<ReferentAssociation>,
         per_page: Option<u8>,
         page: Option<u8>,
-    ) -> Result<Response<ReferentsResponse>, ReqwestError> {
+    ) -> Result<Response<ReferentsResponse>, ClientError> {
         let mut queries = vec![("text_format", String::from("html,plain"))];
         if let Some(created_by_id) = created_by {
             queries.push(("created_by_id", created_by_id.to_string()));
@@ -179,7 +192,7 @@ impl Client {
     pub async fn search(
         &self,
         query: &str,
-    ) -> Result<Response<SearchResponse>, ReqwestError> {
+    ) -> Result<Response<SearchResponse>, ClientError> {
         self.get("/search", &[("q", query)]).await
     }
 
@@ -192,7 +205,7 @@ impl Client {
     /// # Returns
     ///
     /// The song associated with the ID.
-    pub async fn song(&self, id: u32) -> Result<Response<SongResponse>, ReqwestError> {
+    pub async fn song(&self, id: u32) -> Result<Response<SongResponse>, ClientError> {
         self.get(format!("/songs/{}", id), &[("text_format", "html,plain")])
             .await
     }
@@ -206,7 +219,7 @@ impl Client {
     /// # Returns
     ///
     /// The user associated with the ID.
-    pub async fn user(&self, id: u32) -> Result<Response<UserResponse>, ReqwestError> {
+    pub async fn user(&self, id: u32) -> Result<Response<UserResponse>, ClientError> {
         self.get(format!("/users/{}", id), &[("text_format", "html,plain")])
             .await
     }
@@ -227,7 +240,7 @@ impl Client {
         raw_annotatable_url: Option<&str>,
         canonical_url: Option<&str>,
         og_url: Option<&str>,
-    ) -> Result<Response<WebPageResponse>, ReqwestError> {
+    ) -> Result<Response<WebPageResponse>, ClientError> {
         let mut queries = Vec::new();
         if let Some(rau) = raw_annotatable_url {
             queries.push(("raw_annotatable_url", rau));
@@ -307,42 +320,15 @@ impl ClientBuilder {
 }
 
 /// Errors that can occur during [`ClientBuilder::build`].
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum ClientBuilderError {
     /// Missing auth token.
+    #[error("missing auth token")]
     MissingAuthToken,
     /// [`reqwest::ClientBuilder::build`] failed.
-    ReqwestBuilder(ReqwestError),
+    #[error("internal client build error: {0}")]
+    ReqwestBuilder(#[from] ReqwestError),
     /// Invalid value for the [`reqwest::header::AUTHORIZATION`] header.
-    AuthHeaderValue(InvalidHeaderValue),
-}
-
-impl Display for ClientBuilderError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::MissingAuthToken => {
-                write!(f, "missing auth token")
-            }
-            Self::ReqwestBuilder(err) => {
-                write!(f, "internal client build error: {}", err)
-            }
-            Self::AuthHeaderValue(err) => {
-                write!(f, "invalid auth header value: {}", err)
-            }
-        }
-    }
-}
-
-impl Error for ClientBuilderError {}
-
-impl From<ReqwestError> for ClientBuilderError {
-    fn from(value: ReqwestError) -> Self {
-        ClientBuilderError::ReqwestBuilder(value)
-    }
-}
-
-impl From<InvalidHeaderValue> for ClientBuilderError {
-    fn from(value: InvalidHeaderValue) -> Self {
-        ClientBuilderError::AuthHeaderValue(value)
-    }
+    #[error("invalid auth header value: {0}")]
+    AuthHeaderValue(#[from] InvalidHeaderValue),
 }

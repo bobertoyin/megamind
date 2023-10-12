@@ -6,8 +6,8 @@ use reqwest::{
     Client as ReqwestClient,
 };
 use rstest::*;
-use serde_json::{to_value, Value};
-use tokio::try_join;
+use serde_json::{from_slice, to_value, Value};
+use tokio::join;
 
 use megamind::{Client, ClientBuilder, ReferentAssociation};
 
@@ -38,16 +38,18 @@ pub fn reqwest_client(token: String) -> ReqwestClient {
 #[tokio::test]
 
 async fn test_account(client: Client, reqwest_client: ReqwestClient) {
-    let (result, expected) = try_join!(
+    let (result, expected) = join!(
         client.account(),
         reqwest_client
             .get("https://api.genius.com/account?text_format=plain,html")
             .send()
-    )
-    .unwrap();
+            .await
+            .unwrap()
+            .bytes()
+    );
 
-    let result_json = to_value(result).unwrap();
-    let expected_json = expected.json::<Value>().await.unwrap();
+    let result_json = to_value(result.unwrap()).unwrap();
+    let expected_json = from_slice::<Value>(&expected.unwrap()).unwrap();
     assert_json_eq!(result_json, expected_json);
 }
 
@@ -59,7 +61,7 @@ async fn test_annotation(
     client: Client,
     reqwest_client: ReqwestClient,
 ) {
-    let (result, expected) = try_join!(
+    let (result, expected) = join!(
         client.annotation(id),
         reqwest_client
             .get(format!(
@@ -67,11 +69,13 @@ async fn test_annotation(
                 id
             ))
             .send()
-    )
-    .unwrap();
+            .await
+            .unwrap()
+            .bytes()
+    );
 
-    let result_json = to_value(result).unwrap();
-    let expected_json = expected.json::<Value>().await.unwrap();
+    let result_json = to_value(result.unwrap()).unwrap();
+    let expected_json = from_slice::<Value>(&expected.unwrap()).unwrap();
     assert_json_eq!(result_json, expected_json);
 }
 
@@ -83,7 +87,7 @@ async fn test_artist(
     client: Client,
     reqwest_client: ReqwestClient,
 ) {
-    let (result, expected) = try_join!(
+    let (result, expected) = join!(
         client.artist(id),
         reqwest_client
             .get(format!(
@@ -91,11 +95,13 @@ async fn test_artist(
                 id
             ))
             .send()
-    )
-    .unwrap();
+            .await
+            .unwrap()
+            .bytes()
+    );
 
-    let result_json = to_value(result).unwrap();
-    let expected_json = expected.json::<Value>().await.unwrap();
+    let result_json = to_value(result.unwrap()).unwrap();
+    let expected_json = from_slice::<Value>(&expected.unwrap()).unwrap();
     assert_json_eq!(result_json, expected_json);
 }
 
@@ -135,14 +141,13 @@ async fn test_referents(
     }
     url.push_str("text_format=plain,html");
 
-    let (result, expected) = try_join!(
+    let (result, expected) = join!(
         client.referents(created_by, associated, per_page, page),
-        reqwest_client.get(url).send()
-    )
-    .unwrap();
+        reqwest_client.get(url).send().await.unwrap().bytes()
+    );
 
-    let result_json = to_value(result).unwrap();
-    let expected_json = expected.json::<Value>().await.unwrap();
+    let result_json = to_value(result.unwrap()).unwrap();
+    let expected_json = from_slice::<Value>(&expected.unwrap()).unwrap();
     assert_json_eq!(result_json, expected_json);
 }
 
@@ -155,16 +160,18 @@ async fn test_search(
     client: Client,
     reqwest_client: ReqwestClient,
 ) {
-    let (result, expected) = try_join!(
+    let (result, expected) = join!(
         client.search(query),
         reqwest_client
             .get(format!("https://api.genius.com/search?q={}", query))
             .send()
-    )
-    .unwrap();
+            .await
+            .unwrap()
+            .bytes()
+    );
 
-    let result_json = to_value(result).unwrap();
-    let expected_json = expected.json::<Value>().await.unwrap();
+    let result_json = to_value(result.unwrap()).unwrap();
+    let expected_json = from_slice::<Value>(&expected.unwrap()).unwrap();
     assert_json_eq!(result_json, expected_json);
 }
 
@@ -179,7 +186,7 @@ async fn test_song(
     client: Client,
     reqwest_client: ReqwestClient,
 ) {
-    let (result, expected) = try_join!(
+    let (result, expected) = join!(
         client.song(id),
         reqwest_client
             .get(format!(
@@ -187,11 +194,13 @@ async fn test_song(
                 id
             ))
             .send()
-    )
-    .unwrap();
+            .await
+            .unwrap()
+            .bytes()
+    );
 
-    let result_json = to_value(result).unwrap();
-    let expected_json = expected.json::<Value>().await.unwrap();
+    let result_json = to_value(result.unwrap()).unwrap();
+    let expected_json = from_slice::<Value>(&expected.unwrap()).unwrap();
     assert_json_include!(actual: result_json, expected: expected_json);
 }
 
@@ -203,7 +212,7 @@ async fn test_user(
     client: Client,
     reqwest_client: ReqwestClient,
 ) {
-    let (result, expected) = try_join!(
+    let (result, expected) = join!(
         client.user(id),
         reqwest_client
             .get(format!(
@@ -211,11 +220,13 @@ async fn test_user(
                 id
             ))
             .send()
-    )
-    .unwrap();
+            .await
+            .unwrap()
+            .bytes()
+    );
 
-    let result_json = to_value(result).unwrap();
-    let expected_json = expected.json::<Value>().await.unwrap();
+    let result_json = to_value(result.unwrap()).unwrap();
+    let expected_json = from_slice::<Value>(&expected.unwrap()).unwrap();
     assert_json_eq!(result_json, expected_json);
 }
 
@@ -242,13 +253,12 @@ async fn test_web_pages(
         url.push_str(&format!("og_url={}&", ou));
     }
 
-    let (result, expected) = try_join!(
+    let (result, expected) = join!(
         client.web_pages(raw_annotatable_url, canonical_url, og_url),
-        reqwest_client.get(&url).send()
-    )
-    .unwrap();
+        reqwest_client.get(&url).send().await.unwrap().bytes()
+    );
 
-    let result_json = to_value(result).unwrap();
-    let expected_json = expected.json::<Value>().await.unwrap();
+    let result_json = to_value(result.unwrap()).unwrap();
+    let expected_json = from_slice::<Value>(&expected.unwrap()).unwrap();
     assert_json_eq!(result_json, expected_json);
 }
