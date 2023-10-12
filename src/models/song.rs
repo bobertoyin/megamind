@@ -37,9 +37,9 @@ pub struct Song {
     /// If the song has a featured video.
     pub featured_video: bool,
     /// The song's language.
-    pub language: String,
+    pub language: Option<String>,
     /// Reason for a lyrics placeholder.
-    pub lyrics_placeholder_reason: (),
+    pub lyrics_placeholder_reason: Option<String>,
     /// Recording location.
     pub recording_location: Option<String>,
     /// Release date.
