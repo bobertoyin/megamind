@@ -1,5 +1,8 @@
 # `megamind`
 
+![Crates.io](https://img.shields.io/crates/v/megamind?logo=rust)
+ ![docs.rs (with version)](https://img.shields.io/docsrs/megamind/latest?logo=docsdotrs)
+
 A library for interacting with the [Genius API](https://docs.genius.com).
 
 This library revolves around providing two things:
