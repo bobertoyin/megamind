@@ -71,14 +71,17 @@ impl Client {
                 .collect::<Vec<String>>()
                 .join(",")
         );
-        Ok(self
+        let response = self
             .internal
             .get(format!("{}{}", BASE_URL, endpoint.as_ref()))
             .query(query)
             .send()
-            .await?
+            .await?;
+        let resp_url = response.url().clone();
+        Ok(response
             .json::<Response<T>>()
-            .await?)
+            .await
+            .map_err(|e| e.with_url(resp_url))?)
     }
 
     /// Get the account info for the currently authed user.
