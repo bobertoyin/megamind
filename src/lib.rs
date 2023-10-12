@@ -17,7 +17,6 @@ use reqwest::{
     Client as ReqwestClient, Error as ReqwestError,
 };
 use serde::{de::DeserializeOwned, Serialize};
-use serde_json::{from_slice, Error as JsonError};
 use thiserror::Error;
 
 pub mod models;
@@ -28,14 +27,8 @@ pub const BASE_URL: &str = "https://api.genius.com";
 
 /// Client errors.
 #[derive(Debug, Error)]
-pub enum ClientError {
-    /// An error related to the act of sending and receiving over HTTP.
-    #[error("HTTP request error: {0}")]
-    HttpError(#[from] ReqwestError),
-    /// An error related to parsing an HTTP response body as JSON.
-    #[error("JSON parse error: {0}")]
-    JsonError(#[from] JsonError),
-}
+#[error("megamind client error: {0}")]
+pub struct ClientError(#[from] ReqwestError);
 
 /// An HTTP client for interacting with the Genius API.
 ///
@@ -78,15 +71,14 @@ impl Client {
                 .collect::<Vec<String>>()
                 .join(",")
         );
-        let text = self
+        Ok(self
             .internal
             .get(format!("{}{}", BASE_URL, endpoint.as_ref()))
             .query(query)
             .send()
             .await?
-            .bytes()
-            .await?;
-        Ok(from_slice(&text)?)
+            .json::<Response<T>>()
+            .await?)
     }
 
     /// Get the account info for the currently authed user.
