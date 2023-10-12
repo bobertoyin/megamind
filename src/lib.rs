@@ -28,7 +28,7 @@ pub const BASE_URL: &str = "https://api.genius.com";
 /// Client errors.
 #[derive(Debug, Error)]
 #[error("megamind client error: {0}")]
-pub struct ClientError(#[from] ReqwestError);
+pub struct ClientError(#[from] pub ReqwestError);
 
 /// An HTTP client for interacting with the Genius API.
 ///
