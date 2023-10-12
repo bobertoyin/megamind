@@ -24,7 +24,7 @@ pub mod models;
 use models::*;
 
 /// The base URL for the API.
-pub static BASE_URL: &str = "https://api.genius.com";
+pub const BASE_URL: &str = "https://api.genius.com";
 
 /// Client errors.
 #[derive(Debug, Error)]
