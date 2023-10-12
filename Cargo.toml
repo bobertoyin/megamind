@@ -12,7 +12,6 @@ keywords = ["genius", "music"]
 categories = ["api-bindings", "web-programming::http-client"]
 
 [features]
-all = ["catchall"]
 catchall = []
 
 [package.metadata.docs.rs]
