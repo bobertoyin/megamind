@@ -96,6 +96,8 @@ pub enum Role {
     Mediator,
     /// A normal contributor.
     Contributor,
+    /// A transcriber.
+    Transcriber,
 }
 
 /// Avatar images.
