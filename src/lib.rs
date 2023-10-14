@@ -193,11 +193,11 @@ impl Client {
     /// # Returns
     ///
     /// Search results associated with the query.
-    pub async fn search(
+    pub async fn search<S: AsRef<str>>(
         &self,
-        query: &str,
+        query: S,
     ) -> Result<Response<SearchResponse>, ClientError> {
-        self.get("/search", &[("q", query)]).await
+        self.get("/search", &[("q", query.as_ref())]).await
     }
 
     /// Get a song.
