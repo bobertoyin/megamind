@@ -14,7 +14,7 @@
 use log::info;
 use reqwest::{
     header::{HeaderMap, HeaderValue, InvalidHeaderValue, AUTHORIZATION},
-    Client as ReqwestClient, Error as ReqwestError,
+    Client as ReqwestClient, Error as ReqwestError, StatusCode,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use thiserror::Error;
@@ -27,8 +27,14 @@ pub const BASE_URL: &str = "https://api.genius.com";
 
 /// Client errors.
 #[derive(Debug, Error)]
-#[error("megamind client error: {0}")]
-pub struct ClientError(#[from] pub ReqwestError);
+pub enum ClientError{ 
+    /// A general client error.
+    #[error("megamind client error: {0}")]
+    General(#[from] ReqwestError),
+    /// A rate limit error.
+    #[error("megamind rate limit error")]
+    RateLimited,
+}
 
 /// An HTTP client for interacting with the Genius API.
 ///
@@ -78,6 +84,9 @@ impl Client {
             .send()
             .await?;
         let resp_url = response.url().clone();
+        if response.status() == StatusCode::TOO_MANY_REQUESTS {
+            return Err(ClientError::RateLimited);
+        }
         Ok(response
             .json::<Response<T>>()
             .await
