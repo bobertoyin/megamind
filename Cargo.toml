@@ -1,6 +1,6 @@
 [package]
 name = "megamind"
-version = "0.11.1"
+version = "0.12.0"
 edition = "2021"
 description = "A library for interacting with the Genius API."
 authors = ["Robert Yin <bobertoyin@gmail.com>"]

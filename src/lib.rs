@@ -27,7 +27,7 @@ pub const BASE_URL: &str = "https://api.genius.com";
 
 /// Client errors.
 #[derive(Debug, Error)]
-pub enum ClientError{ 
+pub enum ClientError {
     /// A general client error.
     #[error("megamind client error: {0}")]
     General(#[from] ReqwestError),

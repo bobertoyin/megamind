@@ -4,13 +4,15 @@
 #[cfg(feature = "catchall")]
 use std::collections::HashMap;
 
+use chrono::{serde::ts_seconds, DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "catchall")]
 use serde_json::Value;
 
 use super::{
-    AnnotationMetadata, Metadata, ReferentCore, Role, Text, UserCore, UserInteractions,
+    AnnotationMetadata, Metadata, ReferentCore, Role, Text, UserCore,
+    UserInteractionMetadata, UserInteractions,
 };
 
 /// An annotation response.
@@ -53,8 +55,8 @@ pub struct Annotation {
     pub verified: bool,
     /// Total number of votes on the annotation.
     pub votes_total: i32,
-    /// Rejection comment element. Have yet to see any non-nulls in the wild.
-    pub rejection_comment: (),
+    /// Rejection comment element.
+    pub rejection_comment: Option<RejectionComment>,
     /// Cosigners of the annotation.
     pub cosigned_by: Vec<UserCore<Metadata<UserInteractions>>>,
     /// Verifier of the annotation.
@@ -67,6 +69,57 @@ pub struct Annotation {
     #[cfg(feature = "catchall")]
     #[serde(flatten)]
     pub extra: HashMap<String, Value>,
+}
+
+/// A rejection comment.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+pub struct RejectionComment {
+    /// Genius API path.
+    pub api_path: String,
+    /// Text description.
+    pub body: Text,
+    /// Commentable ID.
+    pub commentable_id: u32,
+    /// Commentable type.
+    pub commentable_type: String,
+    /// Created at.
+    #[serde(with = "ts_seconds")]
+    pub created_at: DateTime<Utc>,
+    /// Whether the comment has voters.
+    pub has_voters: bool,
+    /// Genius ID.
+    pub id: u32,
+    /// Pinned role.
+    pub pinned_role: Option<String>,
+    /// Total votes.
+    pub votes_total: u32,
+    /// Anonymous author.
+    pub anonymous_author: (),
+    /// Author.
+    pub author: UserCore<UserInteractionMetadata>,
+    /// Reason.
+    pub reason: Option<RejectionReason>,
+}
+
+/// A rejection reason.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+pub struct RejectionReason {
+    /// Context URL.
+    pub context_url: String,
+    /// Display character.
+    pub display_character: char,
+    /// Handle.
+    pub handle: String,
+    /// Genius ID.
+    pub id: u32,
+    /// Name.
+    pub name: String,
+    /// Raw name.
+    pub raw_name: String,
+    /// Requires body.
+    pub requires_body: bool,
+    /// Slug.
+    pub slug: String,
 }
 
 /// An attribution to an author.
