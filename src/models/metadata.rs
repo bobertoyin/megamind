@@ -99,9 +99,12 @@ pub struct AnnotationActions {
 /// Song actions.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Default)]
 pub struct SongActions {
-    /// Edit metadata.
+    /// Editing metadata.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub edit_metadata: Option<PrimaryAction>,
+    /// Answering a question.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub answer_question: Option<PrimaryAction>,
 }
 
 /// Song relationships.

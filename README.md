@@ -39,6 +39,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
 ## Features
 
+### Official (Documented by Genius)
+
+These are endpoints that can be found on [docs.genius.com](https://docs.genius.com) and accessed anytime.
+
 - [X] Get current user
 - [X] Get an annotation
 - [X] Get an artist
@@ -47,12 +51,29 @@ async fn main() -> Result<(), Box<dyn Error>> {
 - [X] Get a user
 - [X] Get a web page
 - [X] Get a song
-- [ ] Get an album
-- [ ] Get a referent
 - [ ] Create an annotation
 - [ ] Update an annotation
 - [ ] Delete an annotation
 - [ ] Upvote/downvote/unvote for an annotation
+
+### Unofficial (Undocumented by Genius)
+
+These are endpoints that cannot be found publicly, but can still be accessed.
+
+<!--
+Much thanks to [Pedro Mendes](https://github.com/alt-art) for showing me many of these endpoints.
+-->
+
+> Do not rely on always having access to these endpoints, as Genius likely has the agency to revoke access whenever they please.
+
+- [ ] Get an album
+- [ ] Get a referent
+
+### Locked by Genius
+
+These are endpoints that clearly existed at some point (likely found in some nested data model), but is not accessible.
+
+- Get a comment
 
 ## Ongoing Improvements
 

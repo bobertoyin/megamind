@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use super::{
-    Annotation, ArtistCoreNoMetadata, ReferentCore, SongMetadata, Text, UserCore,
+    ArtistCoreNoMetadata, Referent, SongMetadata, Text, UserCore,
     UserInteractionMetadata,
 };
 
@@ -49,7 +49,7 @@ pub struct Song {
     /// Custom performances.
     pub custom_performances: Vec<Performance>,
     /// Song description as an annotation.
-    pub description_annotation: DescriptionAnnotation,
+    pub description_annotation: Referent,
     /// User who has marked the song lyrics as complete.
     pub lyrics_marked_complete_by: Option<UserCore<UserInteractionMetadata>>,
     /// Staff who has marked the song lyrics as approved.
@@ -119,7 +119,8 @@ pub struct Video {
     /// URL to the video.
     pub url: String,
     /// The start time of the video.
-    pub start: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub start: Option<u32>,
 }
 
 /// Song relationships.
@@ -170,16 +171,6 @@ pub enum RelationshipType {
     Unknown,
 }
 
-/// Annotation of a song description.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
-pub struct DescriptionAnnotation {
-    /// Referent information.
-    #[serde(flatten)]
-    pub referent: ReferentCore,
-    /// Annotations.
-    pub annotations: Vec<Annotation>,
-}
-
 /// Information about a contribution.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct Contribution {
@@ -188,7 +179,7 @@ pub struct Contribution {
     /// Artist profile associated with the contributor.
     pub artist: ArtistCoreNoMetadata,
     /// User profile associated with the contributor.
-    pub user: UserCore<UserInteractionMetadata>,
+    pub user: Option<UserCore<UserInteractionMetadata>>,
 }
 
 /// Song statistics.
@@ -319,7 +310,7 @@ pub struct DateComponents {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct TranslationSong {
     /// The language of the translation song.
-    pub language: String,
+    pub language: Option<String>,
     /// Essential song data.
     #[serde(flatten)]
     pub essential: SongEssential,
