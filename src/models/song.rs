@@ -243,6 +243,10 @@ pub struct Album {
     pub url: String,
     /// Album's artist.
     pub artist: ArtistCoreNoMetadata,
+    /// Extra data.
+    #[cfg(feature = "catchall")]
+    #[serde(flatten)]
+    pub extra: HashMap<String, Value>,
 }
 
 /// Song data with release date components.
@@ -293,6 +297,10 @@ pub struct SongCore<S> {
     /// Essential song data.
     #[serde(flatten)]
     pub essential: SongEssential,
+    /// Extra data.
+    #[cfg(feature = "catchall")]
+    #[serde(flatten)]
+    pub extra: HashMap<String, Value>,
 }
 
 /// A date by its components.
